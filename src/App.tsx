@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { create } from 'zustand'
 import { useForm } from "react-hook-form";
 import { immer } from 'zustand/middleware/immer'
@@ -48,8 +48,10 @@ const useGameStore = create<GameStore>()(immer((set) => ({
 
 const Game = ({ width, height, numColors }: { width: number, height: number, numColors: number }) => {
   console.log('RENDERING GAME')
+  const [loaded, setLoaded] = useState(false)
   useEffect(() => {
     useGameStore.getState().initCells(height, width, numColors)
+    setLoaded(true)
   }, [height, width, numColors])
 
   const colorCSS = (color: Cell) =>
@@ -93,24 +95,39 @@ const Game = ({ width, height, numColors }: { width: number, height: number, num
       collected.push(i * width + k)
     return collected
   }
+
+  const isValid = () => {
+    return cells.filter((v, i) => v === 'blank' && commons(collect(i)).length > 0).length > 0
+  }
+
+  const commons = (idxs: number[]) => {
+    const colors = idxs.map(idx => cells[idx]) as number[]
+    const clear = []
+
+    for (const idx of idxs) {
+      if (colors.filter(color => color === cells[idx]).length > 1)
+        clear.push(idx)
+    }
+    return clear
+  }
+
   const handler = (idx: number) => {
     if (cells[idx] !== 'blank')
       return
 
     const collected = collect(idx)
-    const colors = collected.map(idx => cells[idx]) as number[]
-    const clear = []
-
-    for (const idx of collected) {
-      if (colors.filter(color => color === cells[idx]).length > 1)
-        clear.push(idx)
-    }
+    const clear = commons(collected)
 
     for (const idx of clear) {
       useGameStore.getState().clearCell(idx)
     }
 
   }
+
+  if (loaded && !isValid()) {
+    alert("GAME JOEVER!!!")
+  }
+
   return (
     <div className="grid gap-1" style={{ gridTemplateColumns: 'repeat(' + width + ', 3rem)' }}>
       {cells.map((v, i) => (
