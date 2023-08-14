@@ -274,7 +274,7 @@ const App = () => {
   const undo = useGameStore((state) => state.undo)
   const canUndo = useGameStore((state) => state.historyPtr >= 0)
   const canRedo = useGameStore((state) => state.historyPtr < state.history.length - 1)
-  const cnts = useGameStore((state) => colorCounts(state))
+  // const cnts = useGameStore((state) => colorCounts(state))
   const allEven = useGameStore((state) => colorCounts(state).filter(v => v % 2 === 1).length === 0)
   const undoUntilAllEven = useGameStore((state) => state.undoUntilAllEven)
   const redo = useGameStore((state) => state.redo)
