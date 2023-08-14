@@ -170,7 +170,7 @@ const Game = ({ width, height, numColors }: { width: number, height: number, num
                 ref.style.width = '2rem'
               }
             }}
-            className="w-8 h-8 transition-all absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded"
+            className="w-8 h-8 transition-all absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded text-slate-600"
             onClick={() => handler(i)}
             ref={e => refs.current[i] = e}
             style={{ backgroundColor: colorCSS(v) }} disabled={v !== 'blank'}>
@@ -201,29 +201,29 @@ const App = () => {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center">
       <h1>color tiles by michael</h1>
-      <div className="p-2 text-sm">
+      <div className="p-2 text-sm flex gap-4">
         <form onSubmit={onSubmit}>
           <label htmlFor="width" className="mx-2 py-1">width:</label>
-          <input defaultValue="23" {...register('width')} className="bg-stone-50 px-2 py-1" />
+          <input defaultValue="23" {...register('width')} className="bg-stone-50 px-2 py-1 w-12" />
           <label htmlFor="height" className="mx-2 py-1">height:</label>
-          <input defaultValue="15" {...register('height')} className="bg-stone-50 px-2 py-1" />
+          <input defaultValue="15" {...register('height')} className="bg-stone-50 px-2 py-1 w-12" />
           <label htmlFor="numColors" className="mx-2 py-1"># colors:</label>
-          <input defaultValue="10" {...register('numColors')} className="bg-stone-50 px-2 py-1" />
+          <input defaultValue="10" {...register('numColors')} className="bg-stone-50 px-2 py-1 w-12" />
           <button type="submit" className="bg-lime-200 ml-2 px-2 py-1">new game</button>
-          <ToggleGroup.Root
-            type="single"
-            defaultValue="hiragana"
-            onValueChange={(value: Alphabet) => {
-              console.log("setting alphabet to", value)
-              setAlphabet(value)
-            }}
-          >
-            <ToggleGroup.Item value="hiragana" className="px-2 py-1 bg-indigo-300">hiragana</ToggleGroup.Item>
-            <ToggleGroup.Item value="latin" className="px-2 py-1 bg-emerald-300">abc</ToggleGroup.Item>
-            <ToggleGroup.Item value="number" className="px-2 py-1 bg-indigo-300">123</ToggleGroup.Item>
-            <ToggleGroup.Item value="blank" className="px-2 py-1 bg-rose-300">[   ]</ToggleGroup.Item>
-          </ToggleGroup.Root>
         </form>
+        <ToggleGroup.Root
+          type="single"
+          defaultValue="hiragana"
+          onValueChange={(value: Alphabet) => {
+            console.log("setting alphabet to", value)
+            setAlphabet(value)
+          }}
+        >
+          <ToggleGroup.Item value="hiragana" className="px-2 py-1 bg-amber-200 data-[state=on]:border border-slate-800">あ..</ToggleGroup.Item>
+          <ToggleGroup.Item value="latin" className="px-2 py-1 bg-emerald-200 data-[state=on]:border border-slate-800">a..</ToggleGroup.Item>
+          <ToggleGroup.Item value="number" className="px-2 py-1 bg-indigo-200 data-[state=on]:border border-slate-800">1..</ToggleGroup.Item>
+          <ToggleGroup.Item value="blank" className="px-2 py-1 bg-rose-200 data-[state=on]:border border-slate-800">&nbsp;..</ToggleGroup.Item>
+        </ToggleGroup.Root>
       </div>
       <Game width={width} height={height} numColors={numColors} />
     </div>
