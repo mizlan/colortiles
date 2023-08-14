@@ -2,10 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { create } from 'zustand'
 import { useForm } from "react-hook-form";
 import { immer } from 'zustand/middleware/immer'
+import * as ToggleGroup from '@radix-ui/react-toggle-group';
 
 type Cell = number | 'blank'
+type Alphabet = 'hiragana' | 'latin' | 'number' | 'blank'
 
 interface GameStore {
+  alphabet: string;
+  setAlphabet: (alphabet: Alphabet) => void;
   cells: Cell[];
   height: number;
   width: number;
@@ -24,6 +28,23 @@ function shuffleArray<T>(array: T[]) {
 }
 
 const useGameStore = create<GameStore>()(immer((set) => ({
+  alphabet: 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわゐゑを',
+  setAlphabet: (alphabet) => set((state) => {
+    switch (alphabet) {
+      case 'hiragana':
+        state.alphabet = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわゐゑを'
+        return
+      case 'latin':
+        state.alphabet = 'abcdefghijklmnopqrstuvwxyz'
+        return
+      case 'number':
+        state.alphabet = '0123456789'
+        return
+      case 'blank':
+        state.alphabet = ' '
+        return
+    }
+  }),
   cells: [],
   height: 15,
   width: 23,
@@ -128,30 +149,32 @@ const Game = ({ width, height, numColors }: { width: number, height: number, num
     alert("GAME JOEVER!!!")
   }
 
+  const alphabet = useGameStore((state) => state.alphabet)
+
   return (
-    <div className="grid gap-1" style={{ gridTemplateColumns: 'repeat(' + width + ', 3rem)' }}>
+    <div className="grid gap-1" style={{ gridTemplateColumns: 'repeat(' + width + ', 2rem)' }}>
       {cells.map((v, i) => (
-        <div key={i} className="relative w-12 h-12">
+        <div key={i} className="relative w-8 h-8">
           <button
             onMouseEnter={() => {
               hovered.current = collect(i)
               for (const ref of hovered.current.map(idx => refs.current![idx])) {
-                ref.style.height = '3.4rem'
-                ref.style.width = '3.4rem'
+                ref.style.height = '2.2rem'
+                ref.style.width = '2.2rem'
                 ref.style.zIndex = '999'
               }
             }}
             onMouseLeave={() => {
               for (const ref of hovered.current.map(idx => refs.current![idx])) {
-                ref.style.height = '3rem'
-                ref.style.width = '3rem'
+                ref.style.height = '2rem'
+                ref.style.width = '2rem'
               }
             }}
-            className="w-12 h-12 transition-all absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded"
+            className="w-8 h-8 transition-all absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded"
             onClick={() => handler(i)}
             ref={e => refs.current[i] = e}
             style={{ backgroundColor: colorCSS(v) }} disabled={v !== 'blank'}>
-            {v === 'blank' ? ' ' : 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわゐゑを'.charAt(v)}
+            {v === 'blank' ? ' ' : alphabet.charAt(v % alphabet.length)}
           </button>
         </div>
       ))}
@@ -171,6 +194,7 @@ const App = () => {
   const width = useGameStore((state) => state.width)
   const height = useGameStore((state) => state.height)
   const numColors = useGameStore((state) => state.numColors)
+  const setAlphabet = useGameStore((state) => state.setAlphabet)
   const onSubmit = handleSubmit(data => {
     useGameStore.getState().initCells(data.height, data.width, data.numColors)
   })
@@ -186,6 +210,19 @@ const App = () => {
           <label htmlFor="numColors" className="mx-2 py-1"># colors:</label>
           <input defaultValue="10" {...register('numColors')} className="bg-stone-50 px-2 py-1" />
           <button type="submit" className="bg-lime-200 ml-2 px-2 py-1">new game</button>
+          <ToggleGroup.Root
+            type="single"
+            defaultValue="hiragana"
+            onValueChange={(value: Alphabet) => {
+              console.log("setting alphabet to", value)
+              setAlphabet(value)
+            }}
+          >
+            <ToggleGroup.Item value="hiragana" className="px-2 py-1 bg-indigo-300">hiragana</ToggleGroup.Item>
+            <ToggleGroup.Item value="latin" className="px-2 py-1 bg-emerald-300">abc</ToggleGroup.Item>
+            <ToggleGroup.Item value="number" className="px-2 py-1 bg-indigo-300">123</ToggleGroup.Item>
+            <ToggleGroup.Item value="blank" className="px-2 py-1 bg-rose-300">[   ]</ToggleGroup.Item>
+          </ToggleGroup.Root>
         </form>
       </div>
       <Game width={width} height={height} numColors={numColors} />
