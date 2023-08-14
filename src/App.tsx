@@ -11,6 +11,9 @@ interface GameStore {
   alphabet: string;
   setAlphabet: (alphabet: Alphabet) => void;
   cells: Cell[];
+  undidCells: Cell[];
+  backup: () => void;
+  undo: () => void;
   height: number;
   width: number;
   numColors: number;
@@ -46,6 +49,15 @@ const useGameStore = create<GameStore>()(immer((set) => ({
     }
   }),
   cells: [],
+  undidCells: [],
+  backup: () => set((state) => {
+    state.undidCells = state.cells
+  }),
+  undo: () => set((state) => {
+    const tmp = state.cells
+    state.cells = state.undidCells
+    state.undidCells = tmp
+  }),
   height: 15,
   width: 23,
   numColors: 10,
@@ -55,6 +67,7 @@ const useGameStore = create<GameStore>()(immer((set) => ({
     state.numColors = numColors
     state.cells = new Array(height * width);
     const amt = Math.floor(height * width / numColors * 0.6);
+    console.log(amt, "of each color")
     for (let i = 0; i < height * width; i++) {
       if (i >= amt * numColors) state.cells[i] = 'blank'
       else state.cells[i] = Math.floor(i / amt)
@@ -80,6 +93,7 @@ const Game = ({ width, height, numColors }: { width: number, height: number, num
       'hsl(' + Math.floor(color / numColors * 360) + ', 100%, ' + ((color % 2 === 0) ? '75' : '90') + '%)'
 
   const cells = useGameStore((state) => state.cells)
+  const backup = useGameStore((state) => state.backup)
   const refs = useRef(new Array(height * width))
   const hovered = useRef([] as number[])
 
@@ -117,10 +131,6 @@ const Game = ({ width, height, numColors }: { width: number, height: number, num
     return collected
   }
 
-  const isValid = () => {
-    return cells.filter((v, i) => v === 'blank' && commons(collect(i)).length > 0).length > 0
-  }
-
   const commons = (idxs: number[]) => {
     const colors = idxs.map(idx => cells[idx]) as number[]
     const clear = []
@@ -132,20 +142,22 @@ const Game = ({ width, height, numColors }: { width: number, height: number, num
     return clear
   }
 
+  const validSquares = new Set(cells.map((cell, idx) => ({ cell, idx })).filter((v) => v.cell === 'blank' && commons(collect(v.idx)).length > 0).map(({ idx }) => idx))
+
   const handler = (idx: number) => {
     if (cells[idx] !== 'blank')
       return
 
+    backup()
     const collected = collect(idx)
     const clear = commons(collected)
 
     for (const idx of clear) {
       useGameStore.getState().clearCell(idx)
     }
-
   }
 
-  if (loaded && !isValid()) {
+  if (loaded && validSquares.size === 0) {
     alert("GAME JOEVER!!!")
   }
 
@@ -173,7 +185,7 @@ const Game = ({ width, height, numColors }: { width: number, height: number, num
             className="w-8 h-8 transition-all absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded text-slate-600"
             onClick={() => handler(i)}
             ref={e => refs.current[i] = e}
-            style={{ backgroundColor: colorCSS(v) }} disabled={v !== 'blank'}>
+            style={{ backgroundColor: colorCSS(v), borderRadius: validSquares.has(i) ? '0.4em' : '0.3em' }} disabled={v !== 'blank'}>
             {v === 'blank' ? ' ' : alphabet.charAt(v % alphabet.length)}
           </button>
         </div>
@@ -195,6 +207,7 @@ const App = () => {
   const height = useGameStore((state) => state.height)
   const numColors = useGameStore((state) => state.numColors)
   const setAlphabet = useGameStore((state) => state.setAlphabet)
+  const undo = useGameStore((state) => state.undo)
   const onSubmit = handleSubmit(data => {
     useGameStore.getState().initCells(data.height, data.width, data.numColors)
   })
@@ -211,6 +224,7 @@ const App = () => {
           <input defaultValue="10" {...register('numColors')} className="bg-stone-50 px-2 py-1 w-12" />
           <button type="submit" className="bg-lime-200 ml-2 px-2 py-1">new game</button>
         </form>
+        <button onClick={() => undo()}>SWAP UNIVERSES</button>
         <ToggleGroup.Root
           type="single"
           defaultValue="hiragana"
