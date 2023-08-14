@@ -219,10 +219,10 @@ const App = () => {
             setAlphabet(value)
           }}
         >
-          <ToggleGroup.Item value="hiragana" className="px-2 py-1 bg-amber-200 data-[state=on]:border border-slate-800">あ..</ToggleGroup.Item>
-          <ToggleGroup.Item value="latin" className="px-2 py-1 bg-emerald-200 data-[state=on]:border border-slate-800">a..</ToggleGroup.Item>
-          <ToggleGroup.Item value="number" className="px-2 py-1 bg-indigo-200 data-[state=on]:border border-slate-800">1..</ToggleGroup.Item>
-          <ToggleGroup.Item value="blank" className="px-2 py-1 bg-rose-200 data-[state=on]:border border-slate-800">&nbsp;..</ToggleGroup.Item>
+          <ToggleGroup.Item value="hiragana" className="w-16 h-8 bg-amber-200 text-slate-600 data-[state=on]:border-2 border-slate-500">あいう</ToggleGroup.Item>
+          <ToggleGroup.Item value="latin" className="w-16 h-8 bg-emerald-200 text-slate-600 data-[state=on]:border-2 border-slate-500">abc</ToggleGroup.Item>
+          <ToggleGroup.Item value="number" className="w-16 h-8 bg-indigo-200 text-slate-600 data-[state=on]:border-2 border-slate-500">123</ToggleGroup.Item>
+          <ToggleGroup.Item value="blank" className="w-16 h-8 bg-rose-200 text-slate-600 data-[state=on]:border-2 border-slate-500">&nbsp;</ToggleGroup.Item>
         </ToggleGroup.Root>
       </div>
       <Game width={width} height={height} numColors={numColors} />
