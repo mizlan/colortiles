@@ -202,7 +202,7 @@ const Game = ({ width, height, numColors }: { width: number, height: number, num
     return clear
   }
 
-  const validSquares = new Set(cells.map((cell, idx) => ({ cell, idx })).filter((v) => v.cell === 'blank' && commons(collect(v.idx)).length > 0).map(({ idx }) => idx))
+  const validSquares = new Set(cells.map((cell, idx) => ({ cell, idx })).filter((v) => (v.cell === 'blank' || cleared[v.idx]) && commons(collect(v.idx)).length > 0).map(({ idx }) => idx))
   // const counts = Counter(cells, numColors)
 
   const handler = (idx: number) => {
